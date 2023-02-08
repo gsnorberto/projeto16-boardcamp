@@ -1,23 +1,12 @@
-import Client from 'pg'
+import pg from 'pg'
 
 import dotenv from 'dotenv'
 dotenv.config()
 
-const connection = new Pool({
+const { Pool } = pg
+
+const connection = {
     connectionString: process.env.DATABASE_URL,
-});
+};
 
-connection.query('SELECT NOW()', (err, res) => {
-    console.log(err, res)
-    connection.end()
-})
-
-const client = new Client({
-    connectionString,
-})
-client.connect()
-
-client.query('SELECT NOW()', (err, res) => {
-    console.log(err, res)
-    client.end()
-})
+export const db = new Pool(connection)
