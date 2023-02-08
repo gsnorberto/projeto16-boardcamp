@@ -17,8 +17,7 @@ export const getCustomerById = async (req, res) => {
 
     try {
         const customer = await db.query(`SELECT * FROM customers WHERE id = '${id}'`)
-        
-        if(customer.rows.length === 0) {
+        if (customer.rows.length === 0) {
             return res.sendStatus(404)
         }
 
@@ -37,20 +36,20 @@ export const addCustomer = async (req, res) => {
         return res.sendStatus(400)
     }
 
-    // check if the cpf already exists in the DB
-    const customer = await db.query(`SELECT * FROM customers WHERE cpf = '${cpf}'`)
-    if(customer.rows.length > 0){
-        return res.sendStatus(409)
-    }
-
     try {
+        // check if the cpf already exists in the DB
+        const customer = await db.query(`SELECT * FROM customers WHERE cpf = '${cpf}'`)
+        if (customer.rows.length > 0) {
+            return res.sendStatus(409)
+        }
+
         const query = `
             INSERT INTO
                 customers (name, phone, cpf, birthday)
             VALUES 
                 ('${name}', '${phone}', '${cpf}', '${birthday}');
         `
-        await db.query(query).rows
+        await db.query(query)
         res.sendStatus(200);
     }
     catch (err) {
@@ -58,11 +57,34 @@ export const addCustomer = async (req, res) => {
     }
 }
 export const updateCustomer = async (req, res) => {
-    try {
+    const { name, phone, cpf, birthday } = req.body
+    let { id } = req.params
 
+    //  check if the birthday value is a valid date
+    if (!dayjs(birthday, 'YYYY-MM-DD', true).isValid()) {
+        console.log("foi")
+        return res.sendStatus(400)
+    }
+
+    try {
+        // check if the cpf already exists in the DB
+        const customer = await db.query(`SELECT * FROM customers WHERE cpf = '${cpf}'`)
+        if (customer.rows.length > 0) {
+            return res.sendStatus(409)
+        }
+
+        const query = `
+            UPDATE customers 
+            SET name = '${name}', age = '${age}', cpf = '${cpf}', birthday = '${birthday}'
+                customers (name, phone, cpf, birthday)
+            VALUES 
+                ('${name}', '${phone}', '${cpf}', '${birthday}');
+        `
+        await db.query(query)
+        res.sendStatus(200);
     }
     catch (err) {
-
+        res.status(500).send(err.message)
     }
 }
 

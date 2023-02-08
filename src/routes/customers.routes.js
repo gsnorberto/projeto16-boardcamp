@@ -6,6 +6,6 @@ import { validateCustomerData } from '../middlewares/customerMiddlewares.js'
 customersRouter.get('/customers', getCustomers)
 customersRouter.get('/customers/:id', getCustomerById)
 customersRouter.post('/customers', validateCustomerData, addCustomer)
-customersRouter.put('/customers/:id', updateCustomer)
+customersRouter.put('/customers/:id', validateCustomerData, updateCustomer)
 
 export default customersRouter
