@@ -2,9 +2,10 @@ import { db } from "../config/database.js"
 
 export const getGames = async (req, res) => {
     try{
-        
+        const customers = await db.query('SELECT * FROM games;')
+        res.send(customers.rows);
     } catch(err){
-        
+        res.status(500).send(err.message)
     }
 }
 
