@@ -6,8 +6,10 @@ dayjs.extend(customParseFormat)
 export const getCustomers = async (req, res) => {
     try {
         const customers = await db.query('SELECT * FROM customers;')
-        console.log(customers.rows[0].birthday)
-        res.send(customers.rows);
+
+        const newData = customers.rows.map(item => ({...item, birthday: dayjs(item.birthday).format('YYYY-MM-DD') }))
+
+        res.send(newData);
     }
     catch (err) {
         res.status(500).send(err.message)
@@ -92,4 +94,3 @@ export const updateCustomer = async (req, res) => {
         res.status(500).send(err.message)
     }
 }
-

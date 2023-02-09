@@ -4,7 +4,16 @@ import dayjs from 'dayjs'
 export const getRentals = async (req, res) => {
     try{
         const rentals = await db.query('SELECT * FROM rentals;')
-        res.send(rentals.rows);
+
+        const newData = rentals.rows.map(item => {
+            if(item.returnDate){
+                return ({...item, rentDate: dayjs(item.rentDate).format('YYYY-MM-DD'), returnDate: dayjs(item.returnDate).format('YYYY-MM-DD') })
+            } else {
+                return ({...item, rentDate: dayjs(item.rentDate).format('YYYY-MM-DD') })
+            }
+        })
+            
+        res.send(newData);
     } catch(err){
         res.status(500).send(err.message)
     }
@@ -69,16 +78,17 @@ export const finalizeRental = async (req, res) => {
         let todayDate = new Date()
         let rentalDate = new Date(rental.rows[0].rentDate)
         let daysRented = rental.rows[0].daysRented
+        let dayMilliseconds = 86400000;
 
-        let dateDifference = todayDate.getTime() - (rentalDate.getTime() + daysRented)// 
+        let dateDifference = todayDate.getTime() - (rentalDate.getTime() + (daysRented * dayMilliseconds))// 
         let dateDelay = Math.ceil(dateDifference / (1000 * 3600 * 24)) // if the result is a positive number there is not delay
 
-        if(dateDelay < 0){
+        if(dateDelay > 0){
             let originalPrice = rental.rows[0].originalPrice
-            delayFee = Math.abs(dateDelay) * (originalPrice/daysRented)
+            delayFee = dateDelay * (originalPrice/daysRented)
         }
 
-        let formatedDate = dayjs(todayDate).format('YYYY-MM-DD')
+        let formatedDate = dayjs(Date.now()).format('YYYY-MM-DD')
 
         let query = `
             UPDATE rentals
