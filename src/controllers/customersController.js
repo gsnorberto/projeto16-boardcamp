@@ -50,7 +50,7 @@ export const addCustomer = async (req, res) => {
                 ($1, $2, $3, $4);
         `
         await db.query(query, [name, phone, cpf, birthday])
-        res.sendStatus(200);
+        res.sendStatus(201);
     }
     catch (err) {
         res.status(500).send(err.message)

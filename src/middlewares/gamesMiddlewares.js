@@ -7,6 +7,8 @@ export const validateGameData = (req, res, next) => {
         if (error == null) {
             next();
         } else {
+            if(error.message === '"name" is required') return res.sendStatus(400);
+
             res.status(422).json({ error: "Dados inválidos" });
         }
     } catch (err) {
