@@ -94,8 +94,20 @@ export const finalizeRental = async (req, res) => {
 }
 
 export const deleteRental = async (req, res) => {
+    let { id } = req.params
+
     try{
-        
+        let rental = await db.query('SELECT * FROM rentals WHERE id = $1', [id])
+        if(rental.rows.length === 0){ // rental not found
+            return res.sendStatus(404)
+        }
+
+        if(rental.rows[0].returnDate === null){ // unfinished rental
+            return res.sendStatus(400)
+        }
+
+        await db.query('DELETE FROM rentals WHERE id = $1', [id])
+        res.sendStatus(200)
     } catch(err){
         res.status(500).send(err.message)
     }
