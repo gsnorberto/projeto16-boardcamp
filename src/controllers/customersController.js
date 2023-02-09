@@ -6,6 +6,7 @@ dayjs.extend(customParseFormat)
 export const getCustomers = async (req, res) => {
     try {
         const customers = await db.query('SELECT * FROM customers;')
+        console.log(customers.rows[0].birthday)
         res.send(customers.rows);
     }
     catch (err) {

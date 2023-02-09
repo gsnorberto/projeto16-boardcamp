@@ -11,9 +11,9 @@ export const validateGameData = (req, res, next) => {
         if (error == null) {
             next();
         } else {
-            res.status(422).json({ error: "Dados inválidos" });
+            res.sendStatus(400)
         }
     } catch (err) {
-        res.status(422).json({ error: "Dados inválidos" });
+        res.sendStatus(400)
     }
 }
