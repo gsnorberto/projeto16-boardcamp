@@ -5,7 +5,7 @@ dayjs.extend(customParseFormat)
 
 export const getCustomers = async (req, res) => {
     try {
-        const customers = await db.query("SELECT * FROM customers")
+        const customers = await db.query('SELECT * FROM customers;')
         res.send(customers.rows);
     }
     catch (err) {
@@ -16,7 +16,7 @@ export const getCustomerById = async (req, res) => {
     let { id } = req.params
 
     try {
-        const customer = await db.query(`SELECT * FROM customers WHERE id = '${id}'`)
+        const customer = await db.query('SELECT * FROM customers WHERE id = $1;', [id])
         if (customer.rows.length === 0) {
             return res.sendStatus(404)
         }
@@ -38,7 +38,7 @@ export const addCustomer = async (req, res) => {
 
     try {
         // check if the cpf already exists in the DB
-        const customer = await db.query(`SELECT * FROM customers WHERE cpf = '${cpf}'`)
+        const customer = await db.query('SELECT * FROM customers WHERE cpf = $1;', [cpf])
         if (customer.rows.length > 0) {
             return res.sendStatus(409)
         }
@@ -47,9 +47,9 @@ export const addCustomer = async (req, res) => {
             INSERT INTO
                 customers (name, phone, cpf, birthday)
             VALUES 
-                ('${name}', '${phone}', '${cpf}', '${birthday}');
+                ($1, $2, $3, $4);
         `
-        await db.query(query)
+        await db.query(query, [name, phone, cpf, birthday])
         res.sendStatus(200);
     }
     catch (err) {
@@ -68,13 +68,13 @@ export const updateCustomer = async (req, res) => {
 
     try {
         // check if the user exists in the database	
-        const dataT1 = await db.query(`SELECT * FROM customers WHERE id = $1;`, [id])
+        const dataT1 = await db.query('SELECT * FROM customers WHERE id = $1;', [id])
         if (dataT1.rows.length === 0) {
             return res.sendStatus(404)
         }
 
         // check if the cpf already exists in the DB
-        const dataT2 = await db.query(`SELECT * FROM customers WHERE cpf = '${cpf}'`)
+        const dataT2 = await db.query('SELECT * FROM customers WHERE cpf = $1;', [cpf])
         if (dataT1.rows[0].cpf !== cpf && dataT2.rows.length > 0) {
             return res.sendStatus(409)
         }
@@ -82,7 +82,7 @@ export const updateCustomer = async (req, res) => {
         const query = `
             UPDATE customers 
             SET name = $1, phone = $2, cpf = $3, birthday = $4
-            WHERE id = $5
+            WHERE id = $5;
         `
         await db.query(query, [name, phone, cpf, birthday, id])
         res.sendStatus(200);
