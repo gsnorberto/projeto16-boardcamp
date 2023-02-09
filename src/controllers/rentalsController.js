@@ -3,6 +3,11 @@ import dayjs from 'dayjs'
 
 export const getRentals = async (req, res) => {
     try {
+        // let query = `
+        //     SELECT rentals.*, games.id, games.name 
+        //     FROM rentals JOIN games
+        //     ON rentals."gameId" = games.id
+        // `
         const rentals = await db.query('SELECT * FROM rentals;')
 
         const newData = rentals.rows.map(item => {
@@ -12,6 +17,14 @@ export const getRentals = async (req, res) => {
                 return ({ ...item, rentDate: dayjs(item.rentDate).format('YYYY-MM-DD') })
             }
         })
+
+        for (const data of newData) {
+            let game = await db.query('SELECT games.id, games.name FROM games WHERE id = $1', [data.gameId])
+            let customer = await db.query('SELECT customers.id, customers.name FROM customers WHERE id = $1', [data.customerId])
+            
+            data.game = game.rows[0]
+            data.customer = customer.rows[0]
+        }
 
         res.send(newData);
     } catch (err) {
@@ -77,7 +90,7 @@ export const finalizeRental = async (req, res) => {
 
         let todayDate = new Date()
         let rentalDate = new Date(rental.rows[0].rentDate)
-        let daysRented = Number(rental.rows[0].daysRented) - 1
+        let daysRented = rental.rows[0].daysRented
         let dayMilliseconds = 86400000;
 
         let dateDifference = todayDate.getTime() - (rentalDate.getTime() + (daysRented * dayMilliseconds))// 
