@@ -3,11 +3,6 @@ import dayjs from 'dayjs'
 
 export const getRentals = async (req, res) => {
     try {
-        // let query = `
-        //     SELECT rentals.*, games.id, games.name 
-        //     FROM rentals JOIN games
-        //     ON rentals."gameId" = games.id
-        // `
         const rentals = await db.query('SELECT * FROM rentals;')
 
         const newData = rentals.rows.map(item => {
@@ -90,11 +85,11 @@ export const finalizeRental = async (req, res) => {
 
         let todayDate = new Date()
         let rentalDate = new Date(rental.rows[0].rentDate)
-        let daysRented = rental.rows[0].daysRented
+        let daysRented = rental.rows[0].daysRented - 1
         let dayMilliseconds = 86400000;
 
         let dateDifference = todayDate.getTime() - (rentalDate.getTime() + (daysRented * dayMilliseconds))// 
-        let dateDelay = Math.ceil(dateDifference / (1000 * 3600 * 24)) // if the result is a positive number there is not delay
+        let dateDelay = Math.ceil(dateDifference / (1000 * 3600 * 24)) // if the result is a negative number there is not delay
 
         if (dateDelay > 0) {
             let originalPrice = rental.rows[0].originalPrice
