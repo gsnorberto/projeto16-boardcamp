@@ -50,7 +50,8 @@ export const addRental = async (req, res) => {
             return res.sendStatus(400)
         }
 
-        let rentDate = dayjs(Date.now()).format('YYYY-MM-DD')
+        let date = new Date()
+        let rentDate = dayjs(date).format('YYYY-MM-DD')
         let originalPrice = Number(daysRented) * Number(game.rows[0].pricePerDay)
         let returnDate = null;
         let delayFee = null;
@@ -84,13 +85,16 @@ export const finalizeRental = async (req, res) => {
         }
 
         let todayDate = new Date()
+        //console.log(todayDate.getDate())
         let rentalDate = new Date(rental.rows[0].rentDate)
-        let daysRented = rental.rows[0].daysRented - 1
+        //console.log(rentalDate.getDate())
+        let daysRented = rental.rows[0].daysRented
         let dayMilliseconds = 86400000;
 
         let dateDifference = todayDate.getTime() - (rentalDate.getTime() + (daysRented * dayMilliseconds))// 
-        let dateDelay = Math.ceil(dateDifference / (1000 * 3600 * 24)) // if the result is a negative number there is not delay
-
+        
+        let dateDelay = Math.floor(dateDifference / dayMilliseconds) // if the result is a negative number there is not delay
+        //console.log(dateDelay)
         if (dateDelay > 0) {
             let originalPrice = rental.rows[0].originalPrice
             delayFee = dateDelay * (originalPrice / daysRented)
