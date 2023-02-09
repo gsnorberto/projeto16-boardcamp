@@ -24,7 +24,9 @@ export const getCustomerById = async (req, res) => {
             return res.sendStatus(404)
         }
 
-        res.send(customer.rows);
+        const newData = customer.rows.map(item => ({...item, birthday: dayjs(item.birthday).format('YYYY-MM-DD') }))
+
+        res.send(newData[0]);
     }
     catch (err) {
         res.status(500).send(err.message)
