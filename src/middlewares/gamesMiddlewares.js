@@ -1,14 +1,16 @@
 import { addGameSchema } from "../schemas/gamesSchemas.js"
 
 export const validateGameData = (req, res, next) => {
+    if(!req.body.name || req.body.name.trim().length === 0) {
+        return res.sendStatus(400);
+    }
+    
     try {
         const { error } = addGameSchema.validate(req.body)
                                                                 
         if (error == null) {
             next();
         } else {
-            if(error.message === '"name" is required') return res.sendStatus(400);
-
             res.status(422).json({ error: "Dados inválidos" });
         }
     } catch (err) {
