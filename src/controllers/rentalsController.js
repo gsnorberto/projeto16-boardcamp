@@ -34,7 +34,6 @@ export const addRental = async (req, res) => {
         }
 
         let rentDate = dayjs(Date.now()).format('YYYY-MM-DD')
-        console.log(rentDate)
         let originalPrice = Number(daysRented) * Number(game.rows[0].pricePerDay)
         let returnDate = null;
         let delayFee = null;
@@ -54,8 +53,41 @@ export const addRental = async (req, res) => {
 }
 
 export const finalizeRental = async (req, res) => {
+    let { id } = req.params
+    let delayFee = 0;
+
     try{
-        
+        let rental = await db.query('SELECT * FROM rentals WHERE id = $1', [id])
+        if(rental.rows.length <= 0){
+            return res.sendStatus(404)
+        }
+
+        if(rental.rows[0].returnDate !== null){
+            return res.sendStatus(400)
+        }
+
+        let todayDate = new Date()
+        let rentalDate = new Date(rental.rows[0].rentDate)
+        let daysRented = rental.rows[0].daysRented
+
+        let dateDifference = todayDate.getTime() - (rentalDate.getTime() + daysRented)// 
+        let dateDelay = Math.ceil(dateDifference / (1000 * 3600 * 24)) // if the result is a positive number there is not delay
+
+        if(dateDelay < 0){
+            let originalPrice = rental.rows[0].originalPrice
+            delayFee = Math.abs(dateDelay) * (originalPrice/daysRented)
+        }
+
+        let formatedDate = dayjs(todayDate).format('YYYY-MM-DD')
+
+        let query = `
+            UPDATE rentals
+            SET "returnDate" = $1, "delayFee" = $2
+            WHERE id = $3
+        `
+        await db.query(query, [formatedDate, delayFee, rental.rows[0].id])
+
+        res.sendStatus(200)
     } catch(err){
         res.status(500).send(err.message)
     }
