@@ -2,16 +2,23 @@ import { db } from "../config/database.js"
 import dayjs from 'dayjs'
 
 export const getRentals = async (req, res) => {
-    let { customerId, gameId, offset, limit, order, desc } = req.query
+    let { customerId, gameId, offset, limit, order, desc, status, startDate } = req.query
     let query;
 
     let stringOffset = ''
     let stringLimit = ''
     let stringOrder = ''
+    let stringStatus = ''
+    let stringStartDate = ''
     if(order){
         if(desc) stringOrder = `ORDER BY "${order}" DESC`
         else stringOrder = `ORDER BY "${order}"`
     }
+    if(status){
+        if(status === 'open') stringStatus = 'WHERE "returnDate" IS NULL'
+        else if (status === 'closed') stringStatus = 'WHERE "returnDate" IS NOT NULL'
+    }
+    if(startDate) stringStartDate = `WHERE "rentDate" >= '${startDate}'`
     if (offset) stringOffset = `OFFSET ${offset}`
     if (limit) stringLimit = `LIMIT ${limit}`
 
@@ -35,6 +42,8 @@ export const getRentals = async (req, res) => {
         } else {
             query = `
                 SELECT * FROM rentals
+                ${stringStatus}
+                ${stringStartDate}
                 ${stringLimit}
                 ${stringOffset}
                 ${stringOrder};
@@ -42,6 +51,7 @@ export const getRentals = async (req, res) => {
         }
         const rentals = await db.query(query)
 
+        // Format the date of the rental data
         const newData = rentals.rows.map(item => {
             if (item.returnDate) {
                 return ({ ...item, rentDate: dayjs(item.rentDate).format('YYYY-MM-DD'), returnDate: dayjs(item.returnDate).format('YYYY-MM-DD') })
@@ -50,6 +60,7 @@ export const getRentals = async (req, res) => {
             }
         })
 
+        // Add game and customer objects to the list of rentals
         for (const data of newData) {
             let game = await db.query('SELECT games.id, games.name FROM games WHERE id = $1', [data.gameId])
             let customer = await db.query('SELECT customers.id, customers.name FROM customers WHERE id = $1', [data.customerId])
