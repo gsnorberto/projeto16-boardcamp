@@ -2,23 +2,35 @@ import { db } from "../config/database.js"
 import dayjs from 'dayjs'
 
 export const getRentals = async (req, res) => {
-    let { customerId } = req.query
-    let { gameId } = req.query
+    let { customerId, gameId, offset, limit } = req.query
     let query;
+
+    let stringOffset = ''
+    let stringLimit = ''
+    if (offset) stringOffset = `OFFSET ${offset}`
+    if (limit) stringLimit = `LIMIT ${limit}`
 
     try {
         if(customerId){
             query = `
                 SELECT * FROM rentals
-                WHERE "customerId" = '${customerId}';
+                WHERE "customerId" = '${customerId}'
+                ${stringLimit}
+                ${stringOffset};
             `
         } else if(gameId) {
             query = `
                 SELECT * FROM rentals
-                WHERE "gameId" = '${gameId}';
+                WHERE "gameId" = '${gameId}'
+                ${stringLimit}
+                ${stringOffset};
             `
         } else {
-            query = 'SELECT * FROM rentals;'
+            query = `
+                SELECT * FROM rentals
+                ${stringLimit}
+                ${stringOffset};
+            `
         }
         const rentals = await db.query(query)
 
