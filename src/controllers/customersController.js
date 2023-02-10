@@ -4,11 +4,16 @@ import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 dayjs.extend(customParseFormat)
 
 export const getCustomers = async (req, res) => {
-    let { cpf, offset, limit } = req.query
+    let { cpf, offset, limit, order, desc } = req.query
     let query;
 
     let stringOffset = ''
     let stringLimit = ''
+    let stringOrder = ''
+    if(order){
+        if(desc) stringOrder = `ORDER BY ${order} DESC`
+        else stringOrder = `ORDER BY ${order}`
+    }
     if(offset) stringOffset = `OFFSET ${offset}`
     if(limit) stringLimit = `LIMIT ${limit}`
 
@@ -18,13 +23,15 @@ export const getCustomers = async (req, res) => {
                 SELECT * FROM customers
                 WHERE cpf LIKE '${cpf}%' 
                 ${stringLimit}
-                ${stringOffset};
+                ${stringOffset}
+                ${stringOrder};
             `
         } else  {
             query = `
                 SELECT * FROM customers
                 ${stringLimit}
-                ${stringOffset};
+                ${stringOffset}
+                ${stringOrder};
             `
         }
         const customers = await db.query(query)

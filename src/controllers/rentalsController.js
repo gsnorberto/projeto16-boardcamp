@@ -2,11 +2,16 @@ import { db } from "../config/database.js"
 import dayjs from 'dayjs'
 
 export const getRentals = async (req, res) => {
-    let { customerId, gameId, offset, limit } = req.query
+    let { customerId, gameId, offset, limit, order, desc } = req.query
     let query;
 
     let stringOffset = ''
     let stringLimit = ''
+    let stringOrder = ''
+    if(order){
+        if(desc) stringOrder = `ORDER BY ${order} DESC`
+        else stringOrder = `ORDER BY ${order}`
+    }
     if (offset) stringOffset = `OFFSET ${offset}`
     if (limit) stringLimit = `LIMIT ${limit}`
 
@@ -16,20 +21,23 @@ export const getRentals = async (req, res) => {
                 SELECT * FROM rentals
                 WHERE "customerId" = '${customerId}'
                 ${stringLimit}
-                ${stringOffset};
+                ${stringOffset}
+                ${stringOrder};
             `
         } else if(gameId) {
             query = `
                 SELECT * FROM rentals
                 WHERE "gameId" = '${gameId}'
                 ${stringLimit}
-                ${stringOffset};
+                ${stringOffset}
+                ${stringOrder};
             `
         } else {
             query = `
                 SELECT * FROM rentals
                 ${stringLimit}
-                ${stringOffset};
+                ${stringOffset}
+                ${stringOrder};
             `
         }
         const rentals = await db.query(query)
