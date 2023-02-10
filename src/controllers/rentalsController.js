@@ -15,10 +15,10 @@ export const getRentals = async (req, res) => {
         else stringOrder = `ORDER BY "${order}"`
     }
     if(status){
-        if(status === 'open') stringStatus = 'WHERE "returnDate" IS NULL'
-        else if (status === 'closed') stringStatus = 'WHERE "returnDate" IS NOT NULL'
+        if(status === 'open') stringStatus = 'AND "returnDate" IS NULL'
+        else if (status === 'closed') stringStatus = 'AND "returnDate" IS NOT NULL'
     }
-    if(startDate) stringStartDate = `WHERE "rentDate" >= '${startDate}'`
+    if(startDate) stringStartDate = `AND "rentDate" >= '${startDate}'`
     if (offset) stringOffset = `OFFSET ${offset}`
     if (limit) stringLimit = `LIMIT ${limit}`
 
@@ -42,6 +42,7 @@ export const getRentals = async (req, res) => {
         } else {
             query = `
                 SELECT * FROM rentals
+                WHERE 1=1
                 ${stringStatus}
                 ${stringStartDate}
                 ${stringLimit}
