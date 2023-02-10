@@ -4,8 +4,19 @@ import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 dayjs.extend(customParseFormat)
 
 export const getCustomers = async (req, res) => {
+    let { cpf } = req.query
+    let query;
+
     try {
-        const customers = await db.query('SELECT * FROM customers;')
+        if(cpf){
+            query = `
+                SELECT * FROM customers
+                WHERE cpf LIKE '${cpf}%'
+            `
+        } else {
+            query = 'SELECT * FROM customers;'
+        }
+        const customers = await db.query(query)
 
         const newData = customers.rows.map(item => ({...item, birthday: dayjs(item.birthday).format('YYYY-MM-DD') }))
 

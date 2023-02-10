@@ -2,8 +2,25 @@ import { db } from "../config/database.js"
 import dayjs from 'dayjs'
 
 export const getRentals = async (req, res) => {
+    let { customerId } = req.query
+    let { gameId } = req.query
+    let query;
+
     try {
-        const rentals = await db.query('SELECT * FROM rentals;')
+        if(customerId){
+            query = `
+                SELECT * FROM rentals
+                WHERE "customerId" = '${customerId}';
+            `
+        } else if(gameId) {
+            query = `
+                SELECT * FROM rentals
+                WHERE "gameId" = '${gameId}';
+            `
+        } else {
+            query = 'SELECT * FROM rentals;'
+        }
+        const rentals = await db.query(query)
 
         const newData = rentals.rows.map(item => {
             if (item.returnDate) {
@@ -85,16 +102,13 @@ export const finalizeRental = async (req, res) => {
         }
 
         let todayDate = new Date()
-        //console.log(todayDate.getDate())
         let rentalDate = new Date(rental.rows[0].rentDate)
-        //console.log(rentalDate.getDate())
         let daysRented = rental.rows[0].daysRented
         let dayMilliseconds = 86400000;
 
         let dateDifference = todayDate.getTime() - (rentalDate.getTime() + (daysRented * dayMilliseconds))// 
         
         let dateDelay = Math.floor(dateDifference / dayMilliseconds) // if the result is a negative number there is not delay
-        //console.log(dateDelay)
         if (dateDelay > 0) {
             let originalPrice = rental.rows[0].originalPrice
             delayFee = dateDelay * (originalPrice / daysRented)
