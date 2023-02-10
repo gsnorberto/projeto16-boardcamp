@@ -11,8 +11,8 @@ export const getCustomers = async (req, res) => {
     let stringLimit = ''
     let stringOrder = ''
     if(order){
-        if(desc) stringOrder = `ORDER BY ${order} DESC`
-        else stringOrder = `ORDER BY ${order}`
+        if(desc) stringOrder = `ORDER BY "${order}" DESC`
+        else stringOrder = `ORDER BY "${order}"`
     }
     if(offset) stringOffset = `OFFSET ${offset}`
     if(limit) stringLimit = `LIMIT ${limit}`
